@@ -1,0 +1,128 @@
+############################################
+#  Trading Bot - config.toml
+############################################
+#
+# This is a reasonable baseline config for a  CLOB-style bot.
+# Fill in secrets/addresses and adjust limits before running anything live.
+#
+# Notes:
+# - Never commit real private keys.
+# - Start with dry_run=true and small limits.
+#
+
+[app]
+name = "-trading-bot"
+environment = "dev"            # dev|staging|prod
+dry_run = true                 # if true: no live orders, only logs/sim
+timezone = "UTC"
+
+[paths]
+data_dir = "./data"
+cache_dir = "./data/cache"
+logs_dir = "./data/logs"
+dll_dir  = "./data/dll"
+
+[logging]
+level = "info"                 # trace|debug|info|warn|error
+format = "json"                # json|pretty
+file_enabled = true
+file_name = "bot.log"
+console_enabled = true
+
+[network]
+chain = "polygon"              # polygon
+rpc_url = "https://polygon-rpc.com"   # prefer your own provider (Alchemy/Infura/etc.)
+rpc_timeout_seconds = 15
+confirmations = 2
+
+[]
+# Where to get API keys depends on implementation; keep placeholders.
+api_base_url = "https://clob..com"
+ws_url = "wss://ws-subscriptions-clob..com/ws"
+request_timeout_seconds = 15
+rate_limit_rps = 8
+
+# If your bot uses API keys / signatures, set them via environment variables.
+# Recommended pattern:
+# - _API_KEY
+# - _API_SECRET
+# - _API_PASSPHRASE (if applicable)
+use_env_credentials = true
+
+[wallet]
+# Addresses only (no private keys here).
+trading_address = "0x0000000000000000000000000000000000000000"
+proxy_address   = "0x0000000000000000000000000000000000000000"
+
+# If the bot signs orders/txs locally, use env var name:
+private_key_env = "BOT_PRIVATE_KEY"
+
+# Stablecoin settings
+quote_asset = "USDC"           # USDC on Polygon (or USDC.e depending on venue)
+
+[copy_trading]
+enabled = false
+target_wallet = "0x0000000000000000000000000000000000000000"
+
+# Scale copied size relative to target trade size.
+size_multiplier = 0.10         # 10% of observed size
+
+# Only copy buys/sells if above this minimum notional.
+min_notional_usd = 5.00
+
+# Optional allow/deny lists (empty = allow all)
+allow_markets = []             # e.g. ["0xMARKETID1", "0xMARKETID2"]
+deny_markets  = []
+
+[strategy]
+mode = "hedged_dual"           # hedged_dual|copy_only|market_making|paper
+
+# Hedge logic:
+# - "symmetric": place opposing orders of equal notional on both outcomes
+# - "asymmetric": skew sizing based on probabilities/edge
+hedge_style = "symmetric"
+
+# Minimum estimated edge to trade (in probability points, e.g. 0.01 = 1%)
+min_edge = 0.01
+
+# Slippage / price protection
+max_slippage = 0.005           # 0.5%
+price_improvement_only = true  # if true: never cross worse than mid/limit logic
+
+# Order placement preferences
+order_type = "limit"           # limit|market (market often not recommended)
+post_only = true
+time_in_force = "GTC"          # GTC|IOC|FOK (depends on venue support)
+
+[risk]
+# Global exposure / spend limits
+max_daily_notional_usd = 200.0
+max_open_notional_usd  = 150.0
+max_position_per_market_usd = 50.0
+
+# Per-trade controls
+min_order_notional_usd = 2.0
+max_order_notional_usd = 15.0
+
+# Stop conditions
+max_consecutive_failures = 8
+kill_switch_on_error = true
+
+[execution]
+poll_interval_ms = 750
+ws_enabled = true
+
+# If the bot retries failed API calls/orders
+max_retries = 3
+retry_backoff_ms = 400
+
+[markets]
+# Selection filters (implementation-specific; kept generic)
+min_liquidity_usd = 500.0
+min_volume_24h_usd = 1000.0
+max_spread = 0.05               # 5%
+
+[simulation]
+enabled = true                  # when dry_run=true, keep this true
+paper_balance_usd = 1000.0
+

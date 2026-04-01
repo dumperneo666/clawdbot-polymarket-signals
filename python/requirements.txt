@@ -1,0 +1,14 @@
+# Core runtime
+python-dotenv
+
+# CLI
+typer[all]
+devtools
+
+# API server
+fastapi
+uvicorn[standard]
+
+# Common HTTP utilities (useful for Polymarket API clients)
+httpx
+websockets
